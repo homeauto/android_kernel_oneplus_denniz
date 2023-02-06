@@ -5096,6 +5096,7 @@ asmlinkage __visible void __sched notrace preempt_schedule_notrace(void)
 	if (likely(!preemptible()))
 		return;
 
+
 	do {
 		/*
 		 * Because the function tracer can trace preempt_count_sub()
@@ -5120,6 +5121,7 @@ asmlinkage __visible void __sched notrace preempt_schedule_notrace(void)
 		prev_ctx = exception_enter();
 		__schedule(true);
 		exception_exit(prev_ctx);
+
 
 		preempt_latency_stop(1);
 		preempt_enable_no_resched_notrace();
