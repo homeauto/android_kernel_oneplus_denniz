@@ -871,6 +871,22 @@ static inline unsigned int get_opp_capacity(struct cpufreq_policy *policy,
 }
 #endif
 
+
+void activate_task(struct rq *rq, struct task_struct *p, int flags)
+{
+	if (task_on_rq_migrating(p))
+		flags |= ENQUEUE_MIGRATED;
+	if (task_contributes_to_load(p))
+		rq->nr_uninterruptible--;
+	enqueue_task(rq, p, flags);
+}
+void deactivate_task(struct rq *rq, struct task_struct *p, int flags)
+{
+	if (task_contributes_to_load(p))
+		rq->nr_uninterruptible++;
+	dequeue_task(rq, p, flags);
+}
+
 void init_opp_capacity_tbl(void)
 {
 	int cpu, cid, prev_cid = -1;
@@ -934,6 +950,8 @@ free_unlock:
 	rcu_read_unlock();
 	kfree(tbl);
 }
+
+
 
 unsigned int find_fit_capacity(unsigned int cap)
 {
@@ -1976,15 +1994,6 @@ static inline void dequeue_task(struct rq *rq, struct task_struct *p, int flags)
 	p->sched_class->dequeue_task(rq, p, flags);
 }
 
-void activate_task(struct rq *rq, struct task_struct *p, int flags)
-{
-	enqueue_task(rq, p, flags);
-}
-
-void deactivate_task(struct rq *rq, struct task_struct *p, int flags)
-{
-	dequeue_task(rq, p, flags);
-}
 
 /*
  * __normal_prio - return the priority that is based on the static prio
